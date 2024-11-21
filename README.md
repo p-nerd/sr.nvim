@@ -17,7 +17,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
 {
-    'username/sr.nvim',
+    'p-nerd/sr.nvim',
     dependencies = {
         'nvim-telescope/telescope.nvim',
     },
@@ -37,7 +37,7 @@ Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
 
 ```lua
 use {
-    'username/sr.nvim',
+    'p-nerd/sr.nvim',
     requires = {'nvim-telescope/telescope.nvim'},
     config = function()
         require('sr').setup({
