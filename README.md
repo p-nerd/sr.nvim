@@ -1,6 +1,6 @@
 # sr.nvim
 
-Telescope-powered multi-file search & replace for Neovim.
+Telescope-powered multi-file search & replace plugin for Neovim.
 
 ## Features
 
