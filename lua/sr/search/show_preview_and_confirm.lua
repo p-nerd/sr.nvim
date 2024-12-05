@@ -21,6 +21,7 @@ end
 -- Show preview window and handle confirmation
 return function(selections, search_pattern, replacement)
     local preview_buf = vim.api.nvim_create_buf(false, true)
+    -- Set up the preview window
     local preview_win = vim.api.nvim_open_win(preview_buf, true, {
         relative = "editor",
         width = math.floor(vim.o.columns * 0.8),
@@ -31,6 +32,7 @@ return function(selections, search_pattern, replacement)
         border = "rounded",
     })
 
+    -- Generate preview content
     local preview_content = { "Preview of changes:", "" }
     for _, file in ipairs(selections) do
         local file_buf = vim.fn.bufadd(file)
@@ -42,16 +44,41 @@ return function(selections, search_pattern, replacement)
         end
     end
 
+    -- Set preview content
     vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, preview_content)
-    vim.api.nvim_buf_set_option(preview_buf, "modifiable", false)
 
-    -- Ask for confirmation
-    vim.ui.select({ "Yes", "No" }, {
-        prompt = "Apply these changes?",
-    }, function(choice)
+    -- Create a global function for handling the confirmation
+    local func_name = "_SearchReplaceConfirm_" .. preview_buf
+    _G[func_name] = function(confirmed)
         vim.api.nvim_win_close(preview_win, true)
-        if choice == "Yes" then
+        if confirmed then
             require("sr.search.handle_replacement")(selections, search_pattern, replacement)
         end
-    end)
+        -- Clean up the global function
+        _G[func_name] = nil
+    end
+
+    -- Add keymaps
+    vim.api.nvim_buf_set_keymap(
+        preview_buf,
+        "n",
+        "y",
+        string.format([[<cmd>lua _G['%s'](true)<CR>]], func_name),
+        { noremap = true, silent = true }
+    )
+
+    vim.api.nvim_buf_set_keymap(
+        preview_buf,
+        "n",
+        "n",
+        string.format([[<cmd>lua _G['%s'](false)<CR>]], func_name),
+        { noremap = true, silent = true }
+    )
+
+    -- Add help text and make buffer non-modifiable
+    local help_text = { "", "Press 'y' to apply changes, 'n' to cancel" }
+    local current_lines = vim.api.nvim_buf_get_lines(preview_buf, 0, -1, false)
+    vim.list_extend(current_lines, help_text)
+    vim.api.nvim_buf_set_lines(preview_buf, 0, -1, false, current_lines)
+    vim.api.nvim_buf_set_option(preview_buf, "modifiable", false)
 end
