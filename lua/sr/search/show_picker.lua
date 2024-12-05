@@ -1,4 +1,5 @@
 local actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
@@ -30,6 +31,14 @@ return function(search_pattern, replacement)
         sorter = conf.generic_sorter({}),
         previewer = conf.file_previewer({}),
         attach_mappings = function(prompt_bufnr, map)
+            -- Select all entries when picker opens
+            vim.schedule(function()
+                local picker = action_state.get_current_picker(prompt_bufnr)
+                for entry in picker.manager:iter() do
+                    picker:get_selection_row(entry)
+                    actions.toggle_selection(prompt_bufnr)
+                end
+            end)
             -- Replace in selected files
             actions.select_default:replace(function()
                 require("sr.search.process_selections")(prompt_bufnr, search_pattern, replacement)
