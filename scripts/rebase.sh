@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Color definitions
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Store the current branch
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
@@ -14,11 +7,11 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 main_branch="main"
 
 # First, fetch all changes from remote
-echo -e "${BLUE}Fetching latest changes from remote...${NC}"
+echo "Fetching latest changes from remote..."
 git fetch --all
 
 # Update the main branch
-echo -e "${BLUE}Updating $main_branch branch...${NC}"
+echo "Updating $main_branch branch..."
 git checkout $main_branch
 git pull origin $main_branch
 
@@ -34,51 +27,51 @@ declare -a failed_branches
 
 # Loop through each branch and rebase
 for branch in $branches; do
-    echo -e "${YELLOW}[$current/$total_branches] Processing branch: $branch${NC}"
+    echo "[$current/$total_branches] Processing branch: $branch"
 
     # Checkout the branch
     if git checkout "$branch"; then
-        echo -e "${YELLOW}Pulling latest changes for $branch...${NC}"
-        git pull origin "$branch" || echo -e "${YELLOW}Note: Branch might not exist on remote yet${NC}"
+        echo "Pulling latest changes for $branch..."
+        git pull origin "$branch" || echo "Note: Branch might not exist on remote yet"
 
-        echo -e "${YELLOW}Rebasing $branch onto $main_branch...${NC}"
+        echo "Rebasing $branch onto $main_branch..."
         if git rebase "$main_branch"; then
-            echo -e "${GREEN}Successfully rebased $branch${NC}"
+            echo "Successfully rebased $branch"
 
-            echo -e "${YELLOW}Pushing changes to remote...${NC}"
+            echo "Pushing changes to remote..."
             if git push origin "$branch" -f; then
-                echo -e "${GREEN}Successfully pushed $branch to remote${NC}"
+                echo "Successfully pushed $branch to remote"
             else
-                echo -e "${RED}Error: Failed to push $branch to remote${NC}"
+                echo "Error: Failed to push $branch to remote"
                 failed_branches+=("$branch - push failed")
             fi
         else
-            echo -e "${RED}Error: Failed to rebase $branch. Aborting rebase...${NC}"
+            echo "Error: Failed to rebase $branch. Aborting rebase..."
             git rebase --abort
             failed_branches+=("$branch - rebase failed")
         fi
     else
-        echo -e "${RED}Error: Failed to checkout $branch${NC}"
+        echo "Error: Failed to checkout $branch"
         failed_branches+=("$branch - checkout failed")
     fi
 
-    echo -e "${BLUE}----------------------------------------${NC}"
+    echo "----------------------------------------"
     ((current++))
 done
 
 # Return to the original branch
-echo -e "${BLUE}Returning to original branch: $current_branch${NC}"
+echo "Returning to original branch: $current_branch"
 git checkout "$current_branch"
 
 # Summary report
-echo -e "\n${BLUE}Operation Summary:${NC}"
-echo -e "${YELLOW}Total branches processed: $((current-1))${NC}"
+echo -e "\nOperation Summary:"
+echo "Total branches processed: $((current-1))"
 if [ ${#failed_branches[@]} -eq 0 ]; then
-    echo -e "${GREEN}All branches were successfully processed!${NC}"
+    echo "All branches were successfully processed!"
 else
-    echo -e "\n${RED}Failed operations:${NC}"
+    echo -e "\nFailed operations:"
     for failure in "${failed_branches[@]}"; do
-        echo -e "${RED}- $failure${NC}"
+        echo "- $failure"
     done
-    echo -e "\n${YELLOW}Please handle these branches manually.${NC}"
+    echo -e "\nPlease handle these branches manually."
 fi
