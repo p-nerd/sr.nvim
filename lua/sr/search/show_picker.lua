@@ -12,9 +12,8 @@ return function(search_pattern, replacement)
         "--files-with-matches",
         "--no-heading",
         "--hidden", -- Include hidden files
-        "--no-ignore", -- Don't respect ignore files (.gitignore, etc)
-        "--glob", -- But explicitly respect .git
-        "!.git/*", -- Exclude .git directory
+        "--glob", -- Exclude .git directory explicitly
+        "!.git/*", -- Exclude .git directory pattern
     }
 
     if config.options.ignore_case then
