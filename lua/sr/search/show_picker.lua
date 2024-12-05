@@ -3,14 +3,26 @@ local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 local config = require("sr.config")
+
 -- Create and show the picker
 return function(search_pattern, replacement)
     -- Build rg command with options
-    local rg_command = { "rg", "--files-with-matches", "--no-heading" }
+    local rg_command = {
+        "rg",
+        "--files-with-matches",
+        "--no-heading",
+        "--hidden", -- Include hidden files
+        "--no-ignore", -- Don't respect ignore files (.gitignore, etc)
+        "--glob", -- But explicitly respect .git
+        "!.git/*", -- Exclude .git directory
+    }
+
     if config.options.ignore_case then
         table.insert(rg_command, "--ignore-case")
     end
+
     table.insert(rg_command, search_pattern)
+
     -- Create a picker to show search results
     local picker = pickers.new({}, {
         prompt_title = "Search Results",
