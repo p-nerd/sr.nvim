@@ -2,6 +2,8 @@
 
 Telescope-powered multi-file search & replace plugin for Neovim.
 
+![sr.nvim Demo](./gif/sr-nvim.gif)
+
 ## Features
 
 -   🔍 Global search and replace across multiple files
