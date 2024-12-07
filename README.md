@@ -12,6 +12,7 @@ Telescope-powered multi-file search & replace plugin for Neovim.
 -   🔄 Support for plain text and regex patterns
 -   💡 Preview changes before applying them
 -   ⚡ Fast and lightweight
+-   📁 Respects .gitignore files for efficient searching
 
 ## Installation
 
@@ -52,6 +53,14 @@ use {
     end
 }
 ```
+
+## File Exclusions
+
+sr.nvim automatically respects your project's .gitignore file when performing searches. This means:
+
+-   Files and directories listed in .gitignore are automatically excluded from search results
+-   Generated files, build artifacts, and other ignored paths won't appear in your search results
+-   No additional configuration needed - it works out of the box with your existing .gitignore settings
 
 ## Configuration
 
