@@ -15,7 +15,6 @@ local function perform_replacement(files, search_pattern, replacement)
             else
                 new_line, replacements = line:gsub(vim.pesc(search_pattern), replacement)
             end
-
             if replacements > 0 then
                 file_changed = true
                 count = count + replacements
@@ -25,6 +24,25 @@ local function perform_replacement(files, search_pattern, replacement)
 
         -- Write changes if file was modified
         if file_changed then
+            local bufnr = vim.fn.bufnr(file)
+
+            -- If buffer exists and is loaded
+            if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
+                -- Save current modification state
+                local modified = vim.api.nvim_buf_get_option(bufnr, "modified")
+
+                -- Temporarily set nomodified to avoid the warning
+                vim.api.nvim_buf_set_option(bufnr, "modified", false)
+
+                -- Update buffer content
+                local content = table.concat(lines, "\n")
+                vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(content, "\n"))
+
+                -- Restore original modification state
+                vim.api.nvim_buf_set_option(bufnr, "modified", modified)
+            end
+
+            -- Write to file
             local f = io.open(file, "w")
             if f then
                 f:write(table.concat(lines, "\n"))
